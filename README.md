@@ -30,6 +30,18 @@ If you are using the servo motor shown as below, any latest version is OK.
 `python -u sdk/motion-writer.py -n <MOTION_FILES_NUMBER>`
 - `-l`: Display the motion list and check the number
 
+`python -u sdk/motion-writer.py -a`
+- `-a`: write all motions.
+
+`python -u sdk/motion-writer.py -m <MOTION_FILES_NUMBER>`
+- `-m`: Write everything from the specified number. 
+
+### python liblrary
+
+```
+    pip install pyserial
+```
+
 ## Motion Editor
 
 [Motion Editor](http://plen.jp/playground/motion-editor/#/?model=plen2-mini)
@@ -47,7 +59,8 @@ If you are using the servo motor shown as below, any latest version is OK.
 - Windows 10 Pro 64 bit
 
 ### Programming Tools (SDK)
-- Python 2.7.17
+- ~~Python 2.7.17~~
+- Python 3.8.5
 
 ## License
 These files are released under [the MIT License](https://opensource.org/licenses/mit-license.php).

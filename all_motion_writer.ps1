@@ -1,0 +1,1 @@
+python -u sdk/motion-writer.py -a

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Python 2.7
+# Python 3.8
 
 '''
 @file  motion_writer.py
@@ -31,15 +31,30 @@ def _findDevice():
             com = DEVICE[0]
         elif 'USB Serial Port' in DEVICE[1]:
             com = DEVICE[0]
+        elif 'USB シリアル デバイス (COM3)' in DEVICE[1]:
+            com = DEVICE[0]
+            print(DEVICE)
         else:
             print("None")
+            print(DEVICE[1])
+            print("OK?: y/n")
+            print("imput:")
+            val = input()
+            if val == "y":
+                com = DEVICE[0]
+                print("OK!")
+            # COM3 - USB シリアル デバイス (COM3) 
+            # ???????
+            # dont get device name
     return com
 
 def wait_ack(compareto):
     if read_buf_flag: check_buf = ""
     while 1:
         read_buf = ser.read()#b'.'
+        #read_buf = str(ser.read(1))
         if compareto == read_buf:
+        #if str(compareto) == read_buf:
             if read_buf_flag:
                 if check_buf[0:3] == ">mf": print(check_buf)
                 elif check_buf[0:3] == ">MF": print(check_buf)
@@ -48,9 +63,13 @@ def wait_ack(compareto):
                 #elif not check_buf == 0xff:
                 elif not check_buf == "\r\n": print(check_buf)
             if debug_flag: print(color.yellow + compareto + color.end)
+            #if debug_flag: print(color.yellow + str(compareto) + color.end)
             break
         elif read_buf:
-            if read_buf_flag: check_buf = check_buf + str(read_buf)
+            if read_buf_flag: 
+                #print(read_buf.hex())
+                #check_buf = check_buf + read_buf.decode('sjis')#.hex()
+                check_buf = check_buf + str(read_buf)
 
 def tx_motion(motion_hex):
     data = [0, 0, 0, 0, 0, 0, 0, 0]
@@ -202,7 +221,8 @@ if __name__ == "__main__":
         try:
             com = _findDevice()
             if not com == "None":
-                ser = serial.Serial(com, 115200)
+                ser = serial.Serial(com, 115200,rtscts = True,dsrdtr = True)
+                #ser.open()
                 time.sleep(0.5) # protect USB connect error
                 break
             else:
