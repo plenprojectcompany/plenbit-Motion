@@ -395,7 +395,7 @@
                     "value": 0
                 }
             ],
-            "transition_time_ms": 100
+            "transition_time_ms": 250
         }
     ],
     "name": "RStep",
