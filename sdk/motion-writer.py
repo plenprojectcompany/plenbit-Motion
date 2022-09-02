@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-# Python 3.8
+# Python 2.7
 
 '''
 @file  motion_writer.py
@@ -37,12 +37,9 @@ def _findDevice():
         else:
             print("None")
             print(DEVICE[1])
-            print("OK?: y/n")
-            print("imput:")
-            val = input()
-            if val == "y":
-                com = DEVICE[0]
-                print("OK!")
+            print("Please press any key to Continue..")
+            input()
+            com = DEVICE[0]
             # COM3 - USB シリアル デバイス (COM3) 
             # ???????
             # dont get device name
@@ -180,7 +177,7 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    motion_dir = "./motion-plenbit/"
+    motion_dir = "../motion-plenbit/"
     motion_list = os.listdir(motion_dir)
     leng = len(motion_list)
     num = 0
