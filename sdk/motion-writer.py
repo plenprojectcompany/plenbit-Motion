@@ -37,8 +37,8 @@ def _findDevice():
         else:
             print("None")
             print(DEVICE[1])
-            print("Please press any key to Continue..")
-            input()
+            #print("Please press any key to Continue..")
+            #input()
             com = DEVICE[0]
             # COM3 - USB シリアル デバイス (COM3) 
             # ???????
@@ -177,7 +177,7 @@ if __name__ == "__main__":
 
     args = arg_parser.parse_args()
 
-    motion_dir = "../motion-plenbit/"
+    motion_dir = "./motion-plenbit/"
     motion_list = os.listdir(motion_dir)
     leng = len(motion_list)
     num = 0
