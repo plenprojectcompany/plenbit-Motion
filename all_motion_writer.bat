@@ -1,1 +1,2 @@
-python -u sdk/motion-writer.py -a
+python sdk/motion-writer.py -a
+pause
