@@ -4,6 +4,25 @@ from microbit import *
 romAD1 = 0x56
 romAD2 = 0x57
 
+
+flag = False
+def flash():
+    global flag
+    if flag:
+        display.set_pixel(0,0,9)
+        flag = False
+    else:
+        display.set_pixel(0,0,0)
+        flag = True
+
+def graph(percent):
+    for x in range(5):
+        for y in range(5):
+            if (5-int(percent/20)) <= y:
+                display.set_pixel(x,y,9)
+    
+    
+
 '''
 PLENmini
 >MF1900016800000000000000b8000000000000019f
@@ -132,6 +151,10 @@ line_num = 43
 
 debugFlag = False
 
+_stage = 0
+_start_adr = 0
+_resetEEPROM = True
+_nHead = ""
 
 while 1:
     adr = 0
@@ -175,7 +198,26 @@ while 1:
 
     if uart.any():
         if _stage == 0:
+            if _resetEEPROM:
+                # モーションデータ削除
+                display.clear()
+                for x in range(74):
+                    for y in range(3):
+                        writeAdr = 50 + 860 * x + y * 256
+                        weep_page(writeAdr,bytearray(b'\xff'*256))
+                    graph(x/0.74)
+                print(";")
+                _resetEEPROM = False
+
+            display.show(Image('00000:'
+                               '00000:'
+                               '97521:'
+                               '00000:'
+                               '00000'))
+            sleep(20)
+            
             _nHead = uart.read(3)
+            
             if _nHead == b'>MF':
                 _stage = 1
 
@@ -183,80 +225,104 @@ while 1:
                 display.show("D")
                 #print("checkEEPROM")
                 testnum = uart.read(2)
-                testnum2 =  str(testnum, 'utf-8')
+                testnum2 =  str(testnum)
                 testnum3 = int(testnum2, 16)
                 checkEprom( testnum3 )
                 #print(b';')
                 display.show("E")
+            elif _nHead == b'com':
+                break
         elif _stage == 1:
+            display.show(Image('00000:'
+                               '00000:'
+                               '15951:'
+                               '00000:'
+                               '00000'))
+            sleep(20)
+            
             #slot
             _n_slot = uart.read(2)
+            
+            
             #if debugFlag: print(_n_slot)
-            _n_adr =  int(_n_slot,16)
-            ###print(_n_adr)
-            #_motion_adr = 0x32 + 860 * _n_adr
-            _motion_adr = initial_zone + interval * _n_adr
-            ###print(_motion_adr)
-            _start_adr = _motion_adr
-            _end_adr = _start_adr + interval
-            _stage = 2
-            weep_page (_motion_adr, _nHead)
-            _motion_adr += 3
-
-            weep_page (_motion_adr, _n_slot)
-            _motion_adr += 2
-            #flame
-            #time
+            if _n_slot:
+                _n_adr =  int(_n_slot,16)
+                ###print(_n_adr)
+                #_motion_adr = 0x32 + 860 * _n_adr
+                _motion_adr = initial_zone + interval * _n_adr
+                ###print(_motion_adr)
+                _start_adr = _motion_adr
+                _end_adr = _start_adr + interval
+                _stage = 2
+                weep_page(_motion_adr, _nHead)
+                _motion_adr += 3
+    
+                weep_page(_motion_adr, _n_slot)
+                _motion_adr += 2
+                #flame
+                #time
         elif _stage == 2:
+            display.show(Image('00000:'
+                               '00000:'
+                               '13579:'
+                               '00000:'
+                               '00000'))
+            sleep(20)
+            
             #_n = uart.read(1)# byte Write
             _n = uart.read(line_num)#org
+            
             #if debugFlag: print(_n)
 
             #if _n == b';':#endcode
-            if _n == b'end':
-                """
-                #FF Ume
-                while 1:
-                    if _end_adr <= _motion_adr:
-                        break
-                    weep (_motion_adr,int.from_bytes(b'\xff', 'big'))
+            flash()
+            if _n:
+                if _n == b'end':
+                    """
+                    #FF Ume
+                    while 1:
+                        if _end_adr <= _motion_adr:
+                            break
+                        weep (_motion_adr,int.from_bytes(b'\xff', 'big'))
+                        _motion_adr += 1
+                    print("end",_motion_adr)
+                    #FF
+                    """
+                    weep (_motion_adr, int.from_bytes(b'\xff', 'big'))
+                    while uart.any()==False: print(";")
+                    _stage = 0
+                    display.show("b")
+                else:
+                    # page Write
+                    # 1page = 256byte
+    
+                    _len = len(_n)
+                    #print(_len)
+                    weep_page(_motion_adr, _n)
+                    
+                    #if debugFlag: print(reep(_motion_adr,line_num))
+                    if debugFlag: print(reep(_motion_adr,_len))
+                    _motion_adr += _len
+    
+                    """
+                    # byte Write
+                    weep (_motion_adr, int.from_bytes(_n, 'big'))
                     _motion_adr += 1
-                print("end",_motion_adr)
-                #FF
-                """
-                weep (_motion_adr, int.from_bytes(b'\xff', 'big'))
-                print(";")
-                _stage = 0
-                #display.show("b")
-            else:
-                # page Write
-                # 1page = 256byte
-
-                _len = len(_n)
-                #print(_len)
-                weep_page (_motion_adr, _n)
-                #if debugFlag: print(reep(_motion_adr,line_num))
-                if debugFlag: print(reep(_motion_adr,_len))
-                _motion_adr += _len
-
-                """
-                # byte Write
-                weep (_motion_adr, int.from_bytes(_n, 'big'))
-                _motion_adr += 1
-                """
-
-                _adr_count = _motion_adr - _start_adr
-                if _adr_count == 53:
-                    print(".")
-                    _n = uart.read(54)
-                #if debugFlag: print("total",_adr_count)
-                if _adr_count == line_num:
-                    #print(b'.')#ack
-                    print(".")
-                    _start_adr = _motion_adr
-                    #_stage = 0
-                elif _adr_count >= line_num:
-                        #print("total",_adr_count)
-                    print("bo")#bufferover
+                    """
+    
+                    _adr_count = _motion_adr - _start_adr
+    
+                    if _adr_count == 53:
+                        while uart.any()==False: print(".")
+                        _n = uart.read(54)
+                    #if debugFlag: print("total",_adr_count)
+                    if _adr_count == line_num:
+                        #print(b'.')#ack
+                        while uart.any()==False: print(".")
+                        _start_adr = _motion_adr
+                        #_stage = 0
+                    elif _adr_count >= line_num:
+                            #print("total",_adr_count)
+                        while uart.any()==False: print("bo")#bufferover
 
         #serialread()
