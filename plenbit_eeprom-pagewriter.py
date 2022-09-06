@@ -16,9 +16,10 @@ def flash():
         flag = True
 
 def graph(percent):
+    if percent >= 100: percent = 100
     for x in range(5):
         for y in range(5):
-            if (5-int(percent/20)) <= y:
+            if (4-int(percent/20)) <= y:
                 display.set_pixel(x,y,9)
     
     
@@ -199,13 +200,19 @@ while 1:
     if uart.any():
         if _stage == 0:
             if _resetEEPROM:
+                # 初期位置データ吸出し
+                initPosition = reep(0,50)
+                
                 # モーションデータ削除
                 display.clear()
-                for x in range(74):
-                    for y in range(3):
-                        writeAdr = 50 + 860 * x + y * 256
-                        weep_page(writeAdr,bytearray(b'\xff'*256))
-                    graph(x/0.74)
+                
+                for x in range(255):
+                    weep_page(x * 255,bytearray(b'\xff'*255))
+                    graph(x/255*100)
+
+                # 初期位置データ書き込み
+                    weep_page(0,initPosition)
+
                 print(";")
                 _resetEEPROM = False
 
