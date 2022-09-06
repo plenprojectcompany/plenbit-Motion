@@ -284,4 +284,4 @@ if __name__ == "__main__":
             num += 1
             if(leng == num):
                 break
-        print(color.red+"Complete"+color.end)
+        print(color.green+"Complete"+color.end)
