@@ -39,13 +39,15 @@ def _findDevice():
     for DEVICE in list(serial.tools.list_ports.comports()):
         if 'mbed Serial Port' in DEVICE[1]:
             com = DEVICE[0]
+            break
         elif 'USB Serial Port' in DEVICE[1]:
             com = DEVICE[0]
-        elif 'USB シリアル デバイス (COM3)' in DEVICE[1]:
+            break
+        elif 'USB シリアル デバイス' in DEVICE[1]:
             com = DEVICE[0]
-            print(DEVICE)
+            break
         else:
-            print("None")
+            print("Waiting for connection...")
             print(DEVICE[1])
             #print("Please press any key to Continue..")
             #input()
